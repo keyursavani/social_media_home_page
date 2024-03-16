@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import '../provider/home_screen_provider.dart';
@@ -15,8 +16,12 @@ class PostCardScreen extends StatefulWidget{
 }
 
 class PostCardScreenState extends State<PostCardScreen>{
+  TextEditingController controller = TextEditingController();
+  final _sheet = GlobalKey();
+  final _controller = DraggableScrollableController();
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<HomeScreenProvider>(context , listen: false);
     // TODO: implement build
    return Scaffold(
      body: SingleChildScrollView(
@@ -24,7 +29,7 @@ class PostCardScreenState extends State<PostCardScreen>{
        child: ListView.builder(
          physics: const BouncingScrollPhysics(),
          shrinkWrap: true,
-         itemCount: 10, // Number of posts
+         itemCount: provider.storyImage.length, // Number of posts
          itemBuilder: (BuildContext context, int index) {
            return getPostCardWidget();
          },
@@ -84,7 +89,7 @@ class PostCardScreenState extends State<PostCardScreen>{
                       const SizedBox(width: 8.0),
                       const Icon(Icons.comment_outlined),
                       const SizedBox(width: 8.0),
-                      const Text('215 comments'),
+                       Text(provider.commentCount.toString()),
                     ],
                   ),
                   const Padding(
@@ -98,20 +103,25 @@ class PostCardScreenState extends State<PostCardScreen>{
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
-                'Caption Text...',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Minima veritatis ab culpa hic, neque blanditiis rerum esse cum sapiente doloremque ullam, voluptate dolor vel omnis libero placeat incidunt dolore facere?',
+                style: TextStyle(fontWeight: FontWeight.w400),
               ),
             ),
             const SizedBox(height: 8.0),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                'View all comments',
-                style: TextStyle(color: Colors.grey),
+            GestureDetector(
+              onTap: (){
+                _showModalBottomSheet(context);
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  'View all comments',
+                  style: TextStyle(color: Colors.grey),
+                ),
               ),
             ),
             const SizedBox(height: 8.0),
-            const Padding(
+             Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.0),
               child: Row(
                 children: [
@@ -123,13 +133,34 @@ class PostCardScreenState extends State<PostCardScreen>{
                   SizedBox(width: 8.0),
                   Expanded(
                     child: TextField(
-                      decoration: InputDecoration(
+                      controller: controller,
+                      onSubmitted:(value) {
+                        if(value != null && value.isNotEmpty){
+                          provider.addComment(value);
+                          controller.clear();
+                          provider.changeCommentCount(1);
+                          Fluttertoast.showToast(
+                            msg: "Comment Added Successfully",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                          );
+                        }
+                        else{
+                          Fluttertoast.showToast(
+                            msg: "Please enter some comment",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                          );
+                        }
+                      },
+                      textInputAction: TextInputAction.done,
+                      decoration: const InputDecoration(
                         hintText: 'Add a comment...',
                         border: InputBorder.none,
                       ),
                     ),
                   ),
-                  Icon(Icons.favorite_border),
+                  const Icon(Icons.favorite_border),
                 ],
               ),
             ),
@@ -145,5 +176,47 @@ class PostCardScreenState extends State<PostCardScreen>{
         ),
       );
     });
+  }
+
+  void _showModalBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Consumer<HomeScreenProvider>(
+            builder: (context , provider , child){
+          return Container(
+            margin: const EdgeInsets.only(left: 20,right: 20,top: 15,bottom: 15),
+            child: ConstrainedBox(
+                constraints:BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.6,
+                  minHeight: MediaQuery.of(context).size.height * 0.2,
+                ),
+              child: ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                itemCount: provider.commentList.length,
+                  itemBuilder: (context,index){
+                return Center(
+                  child: Column(
+                    children: [
+                     Container(
+                       width: MediaQuery.of(context).size.width,
+                       margin: const EdgeInsets.only(top: 10),
+                       padding: const EdgeInsets.all(10),
+                       decoration: BoxDecoration(
+                         borderRadius: const BorderRadius.all(Radius.circular(15)),
+                         border: Border.all(width: 1, color: Colors.black45),
+                           color: Colors.white
+                       ),
+                       child:  Text(provider.commentList[index]),
+                     )
+                    ],
+                  ),
+                );
+              }),
+            ),
+          );
+        });
+      },
+    );
   }
 }

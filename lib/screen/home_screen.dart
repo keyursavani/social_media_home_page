@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:practical_task/provider/home_screen_provider.dart';
+import 'package:practical_task/screen/grid_screen.dart';
+import 'package:practical_task/screen/mentors_screen.dart';
 import 'package:practical_task/screen/post_card_screnn.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget{
   const HomeScreen({super.key});
@@ -36,21 +40,9 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
     precacheImage(const NetworkImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJEB-lN-jOWFEyGU9br7br-cYQCOmuZIlInQ&usqp=CAU'), context);
   }
 
-  List<String> storyImage = [
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJEB-lN-jOWFEyGU9br7br-cYQCOmuZIlInQ&usqp=CAU",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh1mk5eIUKicuPR8Fqo3NXCW1u3nmMq21-FQ&usqp=CAU",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR5wJW8FKf4lIFvic-0EKuANFe8013L-_u7Uw&usqp=CAU",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc7Zy6rcBCoLAq7xDzckixcjRQg8tqpqSC_A&usqp=CAU",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPRlfwTD0Fd0Nid1Jn5BT7dsfZaTM1eVf6ug&usqp=CAU",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJEB-lN-jOWFEyGU9br7br-cYQCOmuZIlInQ&usqp=CAU",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh1mk5eIUKicuPR8Fqo3NXCW1u3nmMq21-FQ&usqp=CAU",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR5wJW8FKf4lIFvic-0EKuANFe8013L-_u7Uw&usqp=CAU",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc7Zy6rcBCoLAq7xDzckixcjRQg8tqpqSC_A&usqp=CAU",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPRlfwTD0Fd0Nid1Jn5BT7dsfZaTM1eVf6ug&usqp=CAU",
-  ];
-
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<HomeScreenProvider>(context , listen: false);
     // TODO: implement build
    return Scaffold(
      resizeToAvoidBottomInset: true,
@@ -84,22 +76,27 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                padding: const EdgeInsets.only(left: 10,right: 10),
                height: 65,
                child: ListView.builder(
-                 itemCount: storyImage.length,
+                 itemCount: provider.storyImage.length,
                    physics: const BouncingScrollPhysics(),
                    scrollDirection: Axis.horizontal,
                    itemBuilder: (context , index){
-                 return Container(
-                   margin: const EdgeInsets.only(right: 10),
-                   height: 55,
-                     width: 65,
-                     decoration:  BoxDecoration(
-                       borderRadius: const BorderRadius.all(Radius.circular(50)),
-                     border: Border.all(width: 2,color: Colors.redAccent),
-                     image:   DecorationImage(
-                     image:  NetworkImage(storyImage[index]),
-                     fit: BoxFit.fill,
-                     ),
-                     ),
+                 return InkWell(
+                   onTap: (){
+                     openStoryWidget(provider.storyImage[index]);
+                   },
+                   child: Container(
+                     margin: const EdgeInsets.only(right: 10),
+                     height: 55,
+                       width: 65,
+                       decoration:  BoxDecoration(
+                         borderRadius: const BorderRadius.all(Radius.circular(50)),
+                       border: Border.all(width: 2,color: Colors.redAccent),
+                       image:   DecorationImage(
+                       image:  AssetImage(provider.storyImage[index]),
+                       fit: BoxFit.fill,
+                       ),
+                       ),
+                   ),
                  );
                }),
              ),
@@ -159,8 +156,8 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
                            controller: _controller,
                            children: const [
                              PostCardScreen(),
-                             Center(child: Text("Competition Screen"),),
-                             Center(child: Text("Mentors Screen"),)
+                             GridViewScreen(),
+                            MentorsScreen(),
                            ],
                          ),
                        ),
@@ -174,5 +171,88 @@ class HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMi
        ),
      ),
    );
+  }
+
+  void openStoryWidget(String imageUrl){
+    bool like = false;
+    showDialog(
+        context: context,
+        builder: (context){
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: WillPopScope(
+              onWillPop: () async {
+                return true;
+              },
+              child: AlertDialog(
+                insetPadding: const EdgeInsets.all(5),
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                content: StatefulBuilder(
+                  builder: (context, setState){
+                    return Wrap(
+                      children: [
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                GestureDetector(
+                                  onTap: (){
+                                    Navigator.pop(context);
+                                  },
+                                  child: Container(
+                                    height: 40,
+                                      width: 40,
+                                      decoration:  BoxDecoration(
+                                        borderRadius: const BorderRadius.all(Radius.circular(50)),
+                                        color: Colors.purple.withOpacity(0.3)
+                                      ),
+                                      child: const Align(
+                                        alignment:Alignment.center,
+                                          child: Padding(
+                                            padding: EdgeInsets.only(left: 5),
+                                            child: Icon(Icons.arrow_back_ios, color: Colors.white,size: 20,),
+                                          ))),
+                                ),
+                                 Text("Story" ,style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.purple.withOpacity(0.7),
+                                  fontWeight: FontWeight.w500
+                                ),),
+                                 Icon(Icons.more_vert ,
+                                color: Colors.purple.withOpacity(0.4),),
+                              ],
+                            ),
+                            const SizedBox(height: 25,),
+                            Image.asset(imageUrl, height: MediaQuery.of(context).size.height * 0.43,
+                              width: MediaQuery.of(context).size.width ,fit: BoxFit.fill,),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: IconButton(
+                                onPressed: (){
+                                  setState((){
+                                    if(like){
+                                      like= false;
+                                    }
+                                    else{
+                                      like = true;
+                                    }
+                                  });
+                                },
+                                icon:  Icon(Icons.favorite_border_outlined,color: like ? Colors.redAccent : Colors.black,),
+                              ),
+                            )
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        });
   }
 }

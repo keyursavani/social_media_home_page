@@ -3,6 +3,7 @@ import 'package:practical_task/provider/home_screen_provider.dart';
 import 'package:practical_task/provider/note_provider.dart';
 import 'package:practical_task/screen/bottom_navigationbar_screen.dart';
 import 'package:practical_task/screen/note_keeper_screen.dart';
+import 'package:practical_task/screen/overlay_entry_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -28,7 +29,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: false,
       ),
       // home: const BottomNavigationBarScreen(),
-      home: const NoteKeeperScreen(),
+      // home: const NoteKeeperScreen(),
+      home: const OverlayEntryScreen(),
     );
   }
 }
